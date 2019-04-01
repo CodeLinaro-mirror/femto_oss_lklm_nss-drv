@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2017, 2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -20,7 +20,7 @@
 #include "nss_tx_rx_common.h"
 #include <nss_gmac_api_if.h>
 
-#define NSS_DP_GMAC_SUPPORTED_FEATURES (NETIF_F_HIGHDMA | NETIF_F_HW_CSUM | NETIF_F_RXCSUM | NETIF_F_SG | NETIF_F_FRAGLIST | (NETIF_F_TSO | NETIF_F_TSO6 | NETIF_F_UFO))
+#define NSS_DP_GMAC_SUPPORTED_FEATURES (NETIF_F_HIGHDMA | NETIF_F_HW_CSUM | NETIF_F_RXCSUM | NETIF_F_SG | NETIF_F_FRAGLIST | (NETIF_F_UFO))
 #define NSS_DATA_PLANE_GMAC_MAX_INTERFACES 4
 
 static DEFINE_SPINLOCK(nss_data_plane_gmac_stats_lock);
