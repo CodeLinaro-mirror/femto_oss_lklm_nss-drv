@@ -90,11 +90,28 @@ static ssize_t nss_crypto_cmn_stats_read(struct file *fp, char __user *ubuf, siz
 
 /*
  * nss_crypto_cmn_stats_write()
- *	Write crypto_cmn statistics
+ *	Write crypto common statistics
  */
 static ssize_t nss_crypto_cmn_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
 {
-	return -ESRCH;
+	int32_t i;
+	uint32_t reset;
+
+	if (kstrtou32_from_user(ubuf, sz, 0, &reset)) {
+		return -EINVAL;
+	}
+
+	if (reset != 0) {
+		return -EINVAL;
+	}
+
+	spin_lock_bh(&nss_crypto_cmn_stats_lock);
+	for (i = 0; i < NSS_CRYPTO_CMN_STATS_MAX; i++) {
+		nss_crypto_cmn_stats[i] = 0;
+	}
+
+	spin_unlock_bh(&nss_crypto_cmn_stats_lock);
+	return sz;
 }
 
 /*
