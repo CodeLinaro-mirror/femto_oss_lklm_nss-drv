@@ -86,11 +86,33 @@ static ssize_t nss_n2h_stats_read(struct file *fp, char __user *ubuf, size_t sz,
 
 /*
  * nss_n2h_stats_write()
- *	Write N2H statistics
+ *	Write N2H stats
  */
 static ssize_t nss_n2h_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
 {
-	return -ESRCH;
+	int32_t i, core;
+	uint32_t reset;
+
+	if (kstrtou32_from_user(ubuf, sz, 0, &reset)) {
+		return -EINVAL;
+	}
+
+	if (reset != 0) {
+		return -EINVAL;
+	}
+
+	/*
+	 * N2H node stats
+	 */
+	spin_lock_bh(&nss_top_main.stats_lock);
+	for (core = 0; core < nss_top_main.num_nss; core++) {
+		for (i = 0; i < NSS_N2H_STATS_MAX; i++) {
+			nss_n2h_stats[core][i] = 0;
+		}
+	}
+	spin_unlock_bh(&nss_top_main.stats_lock);
+
+	return sz;
 }
 
 /*

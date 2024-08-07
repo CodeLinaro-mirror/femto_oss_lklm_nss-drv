@@ -85,6 +85,8 @@ static ssize_t nss_drv_stats_write(struct file *fp, const char __user *ubuf, siz
 
 	/*
 	 * DRV node stats
+	 * SKB count is not a cumulative stats that accumulated over time.
+	 * So, it shouldn't be reset.
 	 */
 	for (i = 0; (i < NSS_DRV_STATS_MAX); i++) {
 		if (i != NSS_DRV_STATS_NSS_SKB_COUNT) {
