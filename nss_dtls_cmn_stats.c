@@ -135,11 +135,40 @@ static ssize_t nss_dtls_cmn_stats_read(struct file *fp, char __user *ubuf, size_
 
 /*
  * nss_dtls_cmn_stats_write()
- *	Write DTLS_CMN statistics
+ *	Write dtls common statistics
  */
 static ssize_t nss_dtls_cmn_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
 {
-	return -ESRCH;
+	int32_t i;
+	uint32_t reset;
+	enum nss_dynamic_interface_type type;
+	uint32_t if_num;
+	struct nss_ctx_instance *nss_ctx = nss_dtls_cmn_get_context();
+	unsigned long *ifmap = nss_dtls_cmn_ifmap_get();
+
+	if (kstrtou32_from_user(ubuf, sz, 0, &reset)) {
+		return -EINVAL;
+	}
+
+	if (reset != 0) {
+		return -EINVAL;
+	}
+
+	for_each_set_bit(if_num, ifmap, NSS_MAX_NET_INTERFACES) {
+
+		type = nss_dynamic_interface_get_type(nss_ctx, if_num);
+		if ((type != NSS_DYNAMIC_INTERFACE_TYPE_DTLS_CMN_INNER) &&
+			(type != NSS_DYNAMIC_INTERFACE_TYPE_DTLS_CMN_OUTER)) {
+			continue;
+		}
+
+		spin_lock_bh(&nss_dtls_cmn_stats_lock);
+		for (i = 0; i < NSS_DTLS_CMN_CTX_STATS_MAX; i++) {
+			nss_dtls_cmn_ctx_stats[if_num][i] = 0;
+		}
+		spin_unlock_bh(&nss_dtls_cmn_stats_lock);
+	}
+	return sz;
 }
 
 /*
