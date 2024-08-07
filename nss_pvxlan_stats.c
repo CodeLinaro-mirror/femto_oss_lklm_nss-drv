@@ -72,6 +72,31 @@ static void nss_pvxlan_tunnel_stats_debug_get(struct nss_pvxlan_tunnel_stats_deb
 }
 
 /*
+ * nss_pvxlan_tunnel_stats_debug_clear()
+ *	Clear PVxLAN Tunnel statistics.
+ */
+static void nss_pvxlan_tunnel_stats_debug_clear(void)
+{
+	uint32_t i;
+	int32_t if_index;
+	uint32_t if_num;
+
+	spin_lock_bh(&nss_pvxlan_tunnel_stats_debug_lock);
+	for (i = 0; i < NSS_PVXLAN_MAX_INTERFACES; i++) {
+		if (nss_pvxlan_tunnel_debug_stats[i].valid) {
+			if_index = nss_pvxlan_tunnel_debug_stats[i].if_index;
+			if_num = nss_pvxlan_tunnel_debug_stats[i].if_num;
+			memset(&nss_pvxlan_tunnel_debug_stats[i], 0,
+				sizeof(struct nss_pvxlan_tunnel_stats_debug));
+			nss_pvxlan_tunnel_debug_stats[i].valid = true;
+			nss_pvxlan_tunnel_debug_stats[i].if_index = if_index;
+			nss_pvxlan_tunnel_debug_stats[i].if_num = if_num;
+		}
+	}
+	spin_unlock_bh(&nss_pvxlan_tunnel_stats_debug_lock);
+}
+
+/*
  * nss_pvxlan_stats_read()
  *	Read PVxLAN Tunnel statistics
  */
@@ -148,6 +173,31 @@ static ssize_t nss_pvxlan_stats_read(struct file *fp, char __user *ubuf,
 	return bytes_read;
 }
 
+
+/*
+ * nss_pvxlan_stats_write()
+ *	Write PVxLAN stats
+ */
+static ssize_t nss_pvxlan_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	uint32_t reset;
+
+	if (kstrtou32_from_user(ubuf, sz, 0, &reset))
+		return -EINVAL;
+
+	if (reset != 0) {
+		return -EINVAL;
+	}
+
+	/*
+	 * Get all stats
+	 */
+	nss_pvxlan_tunnel_stats_debug_clear();
+
+	return sz;
+}
+
+
 /*
  * nss_pvxlan_stats_sync()
  *	Sync function for pvxlan statistics
@@ -199,15 +249,6 @@ void nss_pvxlan_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_pvxlan_s
 	s->stats[NSS_PVXLAN_TUNNEL_STATS_DROP_LINEAR_FAILED] +=
 		stats_msg->dropped_linear_failed;
 	spin_unlock_bh(&nss_pvxlan_tunnel_stats_debug_lock);
-}
-
-/*
- * nss_pvxlan_stats_write()
- *	Write PVXLAN statistics
- */
-static ssize_t nss_pvxlan_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
-{
-	return -ESRCH;
 }
 
 /*
