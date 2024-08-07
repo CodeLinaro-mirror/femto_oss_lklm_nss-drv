@@ -623,6 +623,17 @@ extern uint32_t nss_capwap_get_max_buf_size(struct nss_ctx_instance *nss_ctx);
 extern bool nss_capwap_get_stats(uint32_t if_num, struct nss_capwap_tunnel_stats *stats);
 
 /**
+ * nss_capwap_clear_stats
+ *	Gets per-tunnel statistics.
+ *
+ * @param[in]  if_num  NSS interface number.
+ *
+ * @return
+ * TRUE or FALSE.
+ */
+extern bool nss_capwap_clear_stats(uint32_t if_num);
+
+/**
  * nss_capwap_init
  *	Initializes the CAPWAP interface.
  *
