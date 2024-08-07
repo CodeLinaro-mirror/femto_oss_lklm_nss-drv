@@ -361,7 +361,23 @@ static ssize_t nss_edma_lite_err_stats_read(struct file *fp, char __user *ubuf, 
  */
 static ssize_t nss_edma_lite_node_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
 {
-	return -ESRCH;
+	int32_t i;
+	uint32_t reset;
+
+	if (kstrtou32_from_user(ubuf, sz, 0, &reset)) {
+		return -EINVAL;
+	}
+
+	if (reset != 0) {
+		return -EINVAL;
+	}
+
+	spin_lock_bh(&nss_top_main.stats_lock);
+	for (i = 0; (i < NSS_STATS_NODE_MAX); i++)
+		edma_stats.node_stats[i] = 0;
+
+	spin_unlock_bh(&nss_top_main.stats_lock);
+	return sz;
 }
 
 /*
@@ -406,7 +422,27 @@ static ssize_t nss_edma_lite_rxfillring_stats_write(struct file *fp, const char 
  */
 static ssize_t nss_edma_lite_err_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
 {
-	return -ESRCH;
+	int32_t i;
+	uint32_t reset;
+
+	if (kstrtou32_from_user(ubuf, sz, 0, &reset)) {
+		return -EINVAL;
+	}
+
+	if (reset != 0) {
+		return -EINVAL;
+	}
+
+	/*
+	 * Error node stats
+	 */
+	spin_lock_bh(&nss_top_main.stats_lock);
+
+	for (i = 0; (i < NSS_EDMA_LITE_ERR_STATS_MAX); i++)
+		edma_stats.err[i] = 0;
+
+	spin_unlock_bh(&nss_top_main.stats_lock);
+	return sz;
 }
 
 /*
