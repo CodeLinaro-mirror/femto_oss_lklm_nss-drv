@@ -68,13 +68,32 @@ static ssize_t nss_drv_stats_read(struct file *fp, char __user *ubuf, size_t sz,
 
 /*
  * nss_drv_stats_write()
- *	Write DRV statistics
+ *	Write DRV stats
  */
 static ssize_t nss_drv_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
 {
-	return -ESRCH;
-}
+	int32_t i;
+	uint32_t reset;
 
+	if (kstrtou32_from_user(ubuf, sz, 0, &reset)) {
+		return -EINVAL;
+	}
+
+	if (reset != 0) {
+		return -EINVAL;
+	}
+
+	/*
+	 * DRV node stats
+	 */
+	for (i = 0; (i < NSS_DRV_STATS_MAX); i++) {
+		if (i != NSS_DRV_STATS_NSS_SKB_COUNT) {
+			NSS_PKT_STATS_WRITE(&nss_top_main.stats_drv[i], 0);
+		}
+	}
+
+	return sz;
+}
 
 /*
  * drv_stats_ops

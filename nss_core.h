@@ -1,7 +1,7 @@
 /*
  **************************************************************************
  * Copyright (c) 2013-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022, 2024 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -96,12 +96,14 @@
 #define NSS_PKT_STATS_ADD(x, i) nss_pkt_stats_add((x), (i))
 #define NSS_PKT_STATS_SUB(x, i) nss_pkt_stats_sub((x), (i))
 #define NSS_PKT_STATS_READ(x) nss_pkt_stats_read(x)
+#define NSS_PKT_STATS_WRITE(x, i) nss_pkt_stats_write(x, (i))
 #else
 #define NSS_PKT_STATS_INC(x)
 #define NSS_PKT_STATS_DEC(x)
 #define NSS_PKT_STATS_ADD(x, i)
 #define NSS_PKT_STATS_SUB(x, i)
 #define NSS_PKT_STATS_READ(x)
+#define NSS_PKT_STATS_WRITE(x, i)
 #endif
 
 /*
@@ -751,6 +753,14 @@ static inline void nss_pkt_stats_sub(atomic64_t *stat, uint32_t pkt)
 static inline uint64_t nss_pkt_stats_read(atomic64_t *stat)
 {
 	return atomic64_read(stat);
+}
+
+/*
+ * nss_pkt_stats_write()
+ */
+static inline void nss_pkt_stats_write(atomic64_t *stat, uint32_t pkt)
+{
+	atomic64_set(stat, pkt);
 }
 
 #endif
