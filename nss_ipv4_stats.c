@@ -103,6 +103,44 @@ static ssize_t nss_ipv4_stats_read(struct file *fp, char __user *ubuf, size_t sz
 }
 
 /*
+ * nss_ipv4_stats_write()
+ *	Write IPV4 stats
+ */
+static ssize_t nss_ipv4_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	int32_t i;
+	uint32_t reset;
+
+	if (kstrtou32_from_user(ubuf, sz, 0, &reset)) {
+		return -EINVAL;
+	}
+
+	if (reset != 0) {
+		return -EINVAL;
+	}
+
+	nss_stats_reset_common_stats(NSS_IPV4_RX_INTERFACE);
+
+	/*
+	 * IPv4 node stats
+	 */
+	spin_lock_bh(&nss_top_main.stats_lock);
+	for (i = 0; i < NSS_IPV4_STATS_MAX; i++) {
+		nss_ipv4_stats[i] = 0;
+	}
+
+	/*
+	 * Exception stats
+	 */
+	for (i = 0; (i < NSS_IPV4_EXCEPTION_EVENT_MAX); i++) {
+		nss_ipv4_exception_stats[i] = 0;
+	}
+	spin_unlock_bh(&nss_top_main.stats_lock);
+
+	return sz;
+}
+
+/*
  * nss_ipv4_stats_conn_sync()
  *	Update driver specific information from the messsage.
  */
@@ -188,15 +226,6 @@ void nss_ipv4_stats_node_sync(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_
 		nss_ipv4_exception_stats[i] += nins->exception_events[i];
 	}
 	spin_unlock_bh(&nss_top->stats_lock);
-}
-
-/*
- * nss_ipv4_stats_write()
- *	Write IPV4 statistics
- */
-static ssize_t nss_ipv4_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
-{
-	return -ESRCH;
 }
 
 /*
