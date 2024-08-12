@@ -94,11 +94,32 @@ static ssize_t nss_c2c_rx_stats_read(struct file *fp, char __user *ubuf, size_t 
 
 /*
  * nss_c2c_rx_stats_write()
- *	Write C2C_RX statistics
+ *	Write c2c_rx stats
  */
 static ssize_t nss_c2c_rx_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
 {
-	return -ESRCH;
+	int32_t i, core;
+	uint32_t reset;
+
+	if (kstrtou32_from_user(ubuf, sz, 0, &reset)) {
+		return -EINVAL;
+	}
+
+	if (reset != 0) {
+		return -EINVAL;
+	}
+
+	/*
+	 * c2c_rx node stats
+	 */
+	for (core = 0; core < NSS_MAX_CORES; core++) {
+		spin_lock_bh(&nss_c2c_rx_stats_lock);
+		for (i = 0; i < NSS_C2C_RX_STATS_MAX; i++) {
+			nss_c2c_rx_stats[core][i] = 0;
+		}
+		spin_unlock_bh(&nss_c2c_rx_stats_lock);
+	}
+	return sz;
 }
 
 /*
