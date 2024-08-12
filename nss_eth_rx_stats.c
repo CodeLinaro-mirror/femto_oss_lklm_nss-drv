@@ -109,11 +109,39 @@ static ssize_t nss_eth_rx_stats_read(struct file *fp, char __user *ubuf, size_t 
 
 /*
  * nss_eth_rx_stats_write()
- *	Write ETH_RX statistics
+ *	Write ETH_RX stats.
  */
 static ssize_t nss_eth_rx_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
 {
-	return -ESRCH;
+	int32_t i;
+	uint32_t reset;
+	struct nss_top_instance *nss_top = &nss_top_main;
+
+	if (kstrtou32_from_user(ubuf, sz, 0, &reset)) {
+		return -EINVAL;
+	}
+
+	if (reset != 0) {
+		return -EINVAL;
+	}
+
+	/*
+	 * eth_rx node stats.
+	 */
+	nss_stats_reset_common_stats(NSS_ETH_RX_INTERFACE);
+
+	spin_lock_bh(&nss_top->stats_lock);
+
+	for (i = 0; (i < NSS_ETH_RX_STATS_MAX); i++) {
+		nss_eth_rx_stats[i] = 0;
+	}
+
+	for (i = 0; (i < NSS_ETH_RX_EXCEPTION_EVENT_MAX); i++) {
+		nss_eth_rx_exception_stats[i] = 0;
+	}
+
+	spin_unlock_bh(&nss_top->stats_lock);
+	return sz;
 }
 
 /*
