@@ -1,9 +1,12 @@
 /*
  **************************************************************************
  * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -335,7 +338,7 @@ nss_pm_interface_status_t nss_pm_set_perf_level(void *handle, nss_pm_perf_level_
 		break;
 
 	default:
-		index = NSS_PM_PERF_LEVEL_IDLE;
+		index = NSS_FREQ_MID_SCALE;
 	}
 
 #if !defined(NSS_HAL_IPQ807x_SUPPORT)

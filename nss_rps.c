@@ -1,7 +1,7 @@
 /*
  **************************************************************************
  * Copyright (c) 2013-2017, 2019-2021 The Linux Foundation. All rights reserved.
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022,2024 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -254,7 +254,7 @@ static nss_tx_status_t nss_rps_cfg(struct nss_ctx_instance *nss_ctx, int enable_
 		nss_warning("%px: nss_tx error setting rps\n", nss_ctx);
 
 		up(&nss_rps_cfg_pvt.sem);
-		return NSS_FAILURE;
+		return NSS_TX_FAILURE;
 	}
 
 	/*
@@ -264,7 +264,7 @@ static nss_tx_status_t nss_rps_cfg(struct nss_ctx_instance *nss_ctx, int enable_
 	if (ret == 0) {
 		nss_warning("%px: Waiting for ack timed out\n", nss_ctx);
 		up(&nss_rps_cfg_pvt.sem);
-		return NSS_FAILURE;
+		return NSS_TX_FAILURE;
 	}
 
 	/*
@@ -274,11 +274,11 @@ static nss_tx_status_t nss_rps_cfg(struct nss_ctx_instance *nss_ctx, int enable_
 	 */
 	if (NSS_FAILURE == nss_rps_cfg_pvt.response) {
 		up(&nss_rps_cfg_pvt.sem);
-		return NSS_FAILURE;
+		return NSS_TX_FAILURE;
 	}
 
 	up(&nss_rps_cfg_pvt.sem);
-	return NSS_SUCCESS;
+	return NSS_TX_SUCCESS;
 }
 
 #ifdef NSS_DRV_IPV4_ENABLE
@@ -304,11 +304,11 @@ static nss_tx_status_t nss_rps_ipv4_hash_bitmap_cfg(struct nss_ctx_instance *nss
 		nss_warning("%px: nss_tx error setting rps\n", nss_ctx);
 
 		up(&nss_rps_cfg_pvt.sem);
-		return NSS_FAILURE;
+		return NSS_TX_FAILURE;
 	}
 
 	up(&nss_rps_cfg_pvt.sem);
-	return NSS_SUCCESS;
+	return NSS_TX_SUCCESS;
 }
 #endif
 
@@ -335,11 +335,11 @@ static nss_tx_status_t nss_rps_ipv6_hash_bitmap_cfg(struct nss_ctx_instance *nss
 		nss_warning("%px: nss_tx error setting rps\n", nss_ctx);
 
 		up(&nss_rps_cfg_pvt.sem);
-		return NSS_FAILURE;
+		return NSS_TX_FAILURE;
 	}
 
 	up(&nss_rps_cfg_pvt.sem);
-	return NSS_SUCCESS;
+	return NSS_TX_SUCCESS;
 }
 #endif
 
@@ -375,7 +375,7 @@ static nss_tx_status_t nss_rps_pri_map_cfg(struct nss_ctx_instance *nss_ctx, int
 		nss_warning("%px: nss_tx error setting rps\n", nss_ctx);
 
 		up(&nss_rps_cfg_pvt.sem);
-		return NSS_FAILURE;
+		return NSS_TX_FAILURE;
 	}
 
 	/*
@@ -385,7 +385,7 @@ static nss_tx_status_t nss_rps_pri_map_cfg(struct nss_ctx_instance *nss_ctx, int
 	if (ret == 0) {
 		nss_warning("%px: Waiting for ack timed out\n", nss_ctx);
 		up(&nss_rps_cfg_pvt.sem);
-		return NSS_FAILURE;
+		return NSS_TX_FAILURE;
 	}
 
 	/*
@@ -395,11 +395,11 @@ static nss_tx_status_t nss_rps_pri_map_cfg(struct nss_ctx_instance *nss_ctx, int
 	 */
 	if (NSS_FAILURE == nss_rps_cfg_pvt.response) {
 		up(&nss_rps_cfg_pvt.sem);
-		return NSS_FAILURE;
+		return NSS_TX_FAILURE;
 	}
 
 	up(&nss_rps_cfg_pvt.sem);
-	return NSS_SUCCESS;
+	return NSS_TX_SUCCESS;
 }
 
 /*
@@ -577,6 +577,8 @@ static struct ctl_table nss_rps_table[] = {
 	{ }
 };
 
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0))
 static struct ctl_table nss_rps_dir[] = {
 	{
 		.procname		= "rps",
@@ -603,6 +605,7 @@ static struct ctl_table nss_rps_root[] = {
 	},
 	{ }
 };
+#endif
 
 static struct ctl_table_header *nss_rps_header;
 
@@ -640,7 +643,11 @@ void nss_rps_register_sysctl(void)
 	/*
 	 * Register sysctl table.
 	 */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0))
 	nss_rps_header = register_sysctl_table(nss_rps_root);
+#else
+	nss_rps_header = register_sysctl("dev/nss/rps", nss_rps_table);
+#endif
 }
 
 /*

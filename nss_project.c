@@ -1,9 +1,12 @@
 /*
  **************************************************************************
  * Copyright (c) 2017-2018, 2020-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -333,6 +336,7 @@ static struct ctl_table nss_project_table[] = {
 	{ }
 };
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0))
 static struct ctl_table nss_project_dir[] = {
 	{
 		.procname		= "project",
@@ -359,6 +363,7 @@ static struct ctl_table nss_project_root[] = {
 	},
 	{ }
 };
+#endif
 
 static struct ctl_table_header *nss_project_header;
 
@@ -368,7 +373,11 @@ static struct ctl_table_header *nss_project_header;
  */
 void nss_project_register_sysctl(void)
 {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0))
 	nss_project_header = register_sysctl_table(nss_project_root);
+#else
+	nss_project_header = register_sysctl("dev/nss/project", nss_project_table);
+#endif
 }
 
 /*

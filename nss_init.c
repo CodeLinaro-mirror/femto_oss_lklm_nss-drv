@@ -1,7 +1,7 @@
 /*
  **************************************************************************
  * Copyright (c) 2013-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022,2024 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -592,6 +592,7 @@ static struct ctl_table nss_general_table[] = {
 	{ }
 };
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0))
 static struct ctl_table nss_init_dir[] = {
 #if (NSS_FREQ_SCALE_SUPPORT == 1)
 	{
@@ -634,6 +635,11 @@ static struct ctl_table nss_root[] = {
 };
 
 static struct ctl_table_header *nss_dev_header;
+#else
+static struct ctl_table_header *nss_clk_hdr;
+static struct ctl_table_header *nss_gen_hdr;
+static struct ctl_table_header *nss_skb_hdr;
+#endif
 
 /*
  * nss_init()
@@ -782,11 +788,16 @@ nss_info("Init NSS driver");
 	 */
 	nss_strings_init();
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0))
 	/*
 	 * Register sysctl table.
 	 */
 	nss_dev_header = register_sysctl_table(nss_root);
-
+#else
+	nss_clk_hdr = register_sysctl("dev/nss/clock", nss_freq_table);
+	nss_gen_hdr = register_sysctl("dev/nss/general", nss_general_table);
+	nss_skb_hdr = register_sysctl("dev/nss/skb_reuse", nss_skb_reuse_table);
+#endif
 	/*
 	 * Registering sysctl for ipv4/6 specific config.
 	 */
@@ -948,9 +959,19 @@ static void __exit nss_cleanup(void)
 {
 	nss_info("Exit NSS driver");
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0))
 	if (nss_dev_header)
 		unregister_sysctl_table(nss_dev_header);
+#else
+	if (nss_clk_hdr)
+		unregister_sysctl_table(nss_clk_hdr);
 
+	if (nss_gen_hdr)
+		unregister_sysctl_table(nss_gen_hdr);
+
+	if (nss_skb_hdr)
+		unregister_sysctl_table(nss_skb_hdr);
+#endif
 	/*
 	 * Unregister n2h specific sysctl
 	 */
