@@ -657,7 +657,11 @@ static int __init nss_init(void)
 #endif
 
 #if defined(NSS_DRV_POINT_OFFLOAD)
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0))
 	pof = of_find_node_by_name(NULL, "reg_update");
+#else
+	pof = of_find_node_by_name(NULL, "reg-update");
+#endif
 	if ((!pof) || (!of_property_read_bool(pof, "ubi_core_enable"))) {
 		nss_info_always("UBI is not enabled. Disable qca-nss-drv\n");
 		return 0;
