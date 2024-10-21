@@ -110,6 +110,12 @@
 #define NSS_CORE_DSB() dsb(sy)
 #define NSS_CORE_DMA_CACHE_MAINT(start, size, dir) nss_core_dma_cache_maint(start, size, dir)
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0))
+#define nss_ioremap ioremap_nocache
+#else
+#define nss_ioremap ioremap
+#endif
+
 /*
  * nss_core_dma_cache_maint()
  *	Perform the appropriate cache op based on direction

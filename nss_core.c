@@ -1,7 +1,7 @@
 /*
  **************************************************************************
  * Copyright (c) 2013-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -53,7 +53,7 @@
  * following kernel versions. Before enabling the driver in new kernels,
  * the skb recycle code must be checked against Linux skb handling.
  *
- * Tested on: 3.4, 3.10, 3.14, 3.18, 4.4 and 5.4
+ * Tested on: 3.4, 3.10, 3.14, 3.18, 4.4, 5.4 and 6.6
  */
 #if (!( \
 (((LINUX_VERSION_CODE >= KERNEL_VERSION(3, 4, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(3, 5, 0)))) || \
@@ -61,7 +61,8 @@
 (((LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(3, 11, 0)))) || \
 (((LINUX_VERSION_CODE >= KERNEL_VERSION(3, 18, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0)))) || \
 (((LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)))) || \
-(((LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(5, 5, 0))))))
+(((LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(5, 5, 0)))) || \
+(((LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(6, 7, 0))))))
 #error "Check skb recycle code in this file to match Linux version"
 #endif
 
@@ -1112,12 +1113,17 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
  */
 static inline void nss_core_set_skb_classify(struct sk_buff *nbuf)
 {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0))
 #ifdef CONFIG_NET_CLS_ACT
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
-		nbuf->tc_verd = SET_TC_NCLS_NSS(nbuf->tc_verd);
+	nbuf->tc_verd = SET_TC_NCLS_NSS(nbuf->tc_verd);
 #else
-		skb_set_tc_classify_offload(nbuf);
+	skb_set_tc_classify_offload(nbuf);
 #endif
+#endif
+#else
+	nss_warning("%px:API not supported on 6.6\n", nbuf);
+	nss_assert(0);
 #endif
 }
 
@@ -2657,9 +2663,13 @@ static inline bool nss_core_skb_can_reuse(struct nss_ctx_instance *nss_ctx,
 
 	if (unlikely(irqs_disabled()))
 		return false;
-
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0))
 	if (unlikely(skb_shinfo(nbuf)->tx_flags & SKBTX_DEV_ZEROCOPY))
 		return false;
+#else
+	if (unlikely(skb_shinfo(nbuf)->tx_flags & SKBFL_ZEROCOPY_ENABLE))
+		return false;
+#endif
 
 	if (unlikely(skb_is_nonlinear(nbuf)))
 		return false;
@@ -2685,6 +2695,16 @@ static inline bool nss_core_skb_can_reuse(struct nss_ctx_instance *nss_ctx,
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 6, 0))
 	if (unlikely(skb_pfmemalloc(nbuf)))
+		return false;
+#endif
+
+	/*
+	 * TODO: This check is only validated on kernel 6.6
+	 * This needs to be validated on prior linux
+	 * kernel versions.
+	 */
+#ifdef CONFIG_SKB_EXTENSIONS
+	if (nbuf->active_extensions)
 		return false;
 #endif
 

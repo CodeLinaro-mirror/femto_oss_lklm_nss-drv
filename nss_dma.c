@@ -1,6 +1,7 @@
 /*
  **************************************************************************
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -378,6 +379,7 @@ static struct ctl_table nss_dma_table[] = {
 	{ }
 };
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0))
 static struct ctl_table nss_dma_dir[] = {
 	{
 		.procname		= "dma",
@@ -404,6 +406,7 @@ static struct ctl_table nss_dma_root[] = {
 	},
 	{ }
 };
+#endif
 
 static struct ctl_table_header *nss_dma_header;
 
@@ -422,7 +425,11 @@ void nss_dma_register_sysctl(void)
 	/*
 	 * Register sysctl table.
 	 */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0))
 	nss_dma_header = register_sysctl_table(nss_dma_root);
+#else
+	nss_dma_header = register_sysctl("dev/nss/dma", nss_dma_table);
+#endif
 }
 
 /*

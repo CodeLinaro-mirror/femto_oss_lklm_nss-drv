@@ -1,7 +1,7 @@
 /*
  **************************************************************************
  * Copyright (c) 2016-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -51,12 +51,6 @@
 #define NSS_AP0_IMAGE "qca-nss0.bin"
 #define NSS_AP1_IMAGE "qca-nss1.bin"
 
-/*
- * File local/Static variables/functions
- */
-static const struct net_device_ops nss_netdev_ops;
-static const struct ethtool_ops nss_ethtool_ops;
-
 int nss_hal_firmware_load(struct nss_ctx_instance *nss_ctx, struct platform_device *nss_dev, struct nss_platform_data *npd)
 {
 	const struct firmware *nss_fw;
@@ -81,7 +75,7 @@ int nss_hal_firmware_load(struct nss_ctx_instance *nss_ctx, struct platform_devi
 	}
 
 
-	load_mem = ioremap_nocache(npd->load_addr, nss_fw->size);
+	load_mem = nss_ioremap(npd->load_addr, nss_fw->size);
 	if (!load_mem) {
 		nss_info_always("%px: ioremap_nocache failed: %x", nss_ctx, npd->load_addr);
 		release_firmware(nss_fw);
