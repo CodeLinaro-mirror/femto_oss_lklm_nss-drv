@@ -1,9 +1,12 @@
 /*
  **************************************************************************
  * Copyright (c) 2017, 2019-2020 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -105,6 +108,15 @@ static ssize_t nss_eth_rx_stats_read(struct file *fp, char __user *ubuf, size_t 
 }
 
 /*
+ * nss_eth_rx_stats_write()
+ *	Write ETH_RX statistics
+ */
+static ssize_t nss_eth_rx_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
+}
+
+/*
  * nss_eth_rx_stats_ops.
  */
 NSS_STATS_DECLARE_FILE_OPERATIONS(eth_rx);
@@ -172,7 +184,7 @@ void nss_eth_rx_stats_notify(struct nss_ctx_instance *nss_ctx)
  */
 int nss_eth_rx_stats_register_notifier(struct notifier_block *nb)
 {
-        return atomic_notifier_chain_register(&nss_eth_rx_stats_notifier, nb);
+	return atomic_notifier_chain_register(&nss_eth_rx_stats_notifier, nb);
 }
 EXPORT_SYMBOL(nss_eth_rx_stats_register_notifier);
 
@@ -182,6 +194,6 @@ EXPORT_SYMBOL(nss_eth_rx_stats_register_notifier);
  */
 int nss_eth_rx_stats_unregister_notifier(struct notifier_block *nb)
 {
-        return atomic_notifier_chain_unregister(&nss_eth_rx_stats_notifier, nb);
+	return atomic_notifier_chain_unregister(&nss_eth_rx_stats_notifier, nb);
 }
 EXPORT_SYMBOL(nss_eth_rx_stats_unregister_notifier);
