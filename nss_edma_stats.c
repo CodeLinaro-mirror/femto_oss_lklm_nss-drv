@@ -1,9 +1,12 @@
 /*
  **************************************************************************
  * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -461,6 +464,78 @@ static ssize_t nss_edma_err_stats_read(struct file *fp, char __user *ubuf, size_
 	kfree(stats_shadow);
 
 	return bytes_read;
+}
+
+/*
+ * nss_edma_port_stats_write()
+ *	Write EDMA_PORT statistics
+ */
+static ssize_t nss_edma_port_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
+}
+
+/*
+ * nss_edma_port_type_stats_write()
+ *	Write EDMA_PORT_TYPE statistics
+ */
+static ssize_t nss_edma_port_type_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
+}
+
+/*
+ * nss_edma_port_ring_map_stats_write()
+ *	Write EDMA_PORT_RING_MAP statistics
+ */
+static ssize_t nss_edma_port_ring_map_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
+}
+
+/*
+ * nss_edma_txring_stats_write()
+ *	Write EDMA_TXRING statistics
+ */
+static ssize_t nss_edma_txring_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
+}
+
+/*
+ * nss_edma_rxring_stats_write()
+ *	Write EDMA_RXRING statistics
+ */
+static ssize_t nss_edma_rxring_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
+}
+
+/*
+ * nss_edma_txcmplring_stats_write()
+ *	Write EDMA_TXCMPLRING statistics
+ */
+static ssize_t nss_edma_txcmplring_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
+}
+
+/*
+ * nss_edma_rxfillring_stats_write()
+ *	Write EDMA_RXFILLRING statistics
+ */
+static ssize_t nss_edma_rxfillring_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
+}
+
+/*
+ * nss_edma_err_stats_write()
+ *	Write EDMA_ERR statistics
+ */
+static ssize_t nss_edma_err_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
 }
 
 /*

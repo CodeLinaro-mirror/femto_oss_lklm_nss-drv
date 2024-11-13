@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022, 2024 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -353,6 +353,60 @@ static ssize_t nss_edma_lite_err_stats_read(struct file *fp, char __user *ubuf, 
 	kfree(stats_shadow);
 
 	return bytes_read;
+}
+
+/*
+ * nss_edma_lite_node_stats_write()
+ *	Write EDMA_LITE_NODE statistics
+ */
+static ssize_t nss_edma_lite_node_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
+}
+
+/*
+ * nss_edma_lite_txring_stats_write()
+ *	Write EDMA_LITE_TXRING statistics
+ */
+static ssize_t nss_edma_lite_txring_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
+}
+
+/*
+ * nss_edma_lite_rxring_stats_write()
+ *	Write EDMA_LITE_RXRING statistics
+ */
+static ssize_t nss_edma_lite_rxring_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
+}
+
+/*
+ * nss_c2c_rx_stats_write()
+ *	Write EDMA_LITE_TXCMPLRING statistics
+ */
+static ssize_t nss_edma_lite_txcmplring_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
+}
+
+/*
+ * nss_edma_lite_rxfillring_stats_write()
+ *	Write edma_lite_rxfillring statistics
+ */
+static ssize_t nss_edma_lite_rxfillring_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
+}
+
+/*
+ * nss_edma_lite_err_stats_write()
+ *	Write EDMA_LITE_ERR statistics
+ */
+static ssize_t nss_edma_lite_err_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
 }
 
 /*

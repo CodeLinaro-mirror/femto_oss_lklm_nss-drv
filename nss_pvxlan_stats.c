@@ -1,9 +1,12 @@
 /*
  **************************************************************************
  * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -196,6 +199,15 @@ void nss_pvxlan_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_pvxlan_s
 	s->stats[NSS_PVXLAN_TUNNEL_STATS_DROP_LINEAR_FAILED] +=
 		stats_msg->dropped_linear_failed;
 	spin_unlock_bh(&nss_pvxlan_tunnel_stats_debug_lock);
+}
+
+/*
+ * nss_pvxlan_stats_write()
+ *	Write PVXLAN statistics
+ */
+static ssize_t nss_pvxlan_stats_write(struct file *fp, const char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return -ESRCH;
 }
 
 /*
