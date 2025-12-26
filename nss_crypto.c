@@ -224,7 +224,7 @@ struct nss_ctx_instance *nss_crypto_data_register(uint32_t if_num, nss_crypto_bu
 
 	nss_ctx = &nss_top_main.nss[nss_top_main.crypto_handler_id];
 
-	if ((if_num >= NSS_MAX_NET_INTERFACES) && (if_num < NSS_MAX_PHYSICAL_INTERFACES)) {
+	if ((if_num >= NSS_MAX_NET_INTERFACES) || (if_num < NSS_MAX_PHYSICAL_INTERFACES)) {
 		nss_warning("%px: data register received for invalid interface %d", nss_ctx, if_num);
 		return NULL;
 	}
@@ -243,7 +243,7 @@ struct nss_ctx_instance *nss_crypto_data_register(uint32_t if_num, nss_crypto_bu
  */
 void nss_crypto_data_unregister(struct nss_ctx_instance *nss_ctx, uint32_t if_num)
 {
-	if ((if_num >= NSS_MAX_NET_INTERFACES) && (if_num < NSS_MAX_PHYSICAL_INTERFACES)) {
+	if ((if_num >= NSS_MAX_NET_INTERFACES) || (if_num < NSS_MAX_PHYSICAL_INTERFACES)) {
 		nss_warning("%px: data unregister received for invalid interface %d", nss_ctx, if_num);
 		return;
 	}
