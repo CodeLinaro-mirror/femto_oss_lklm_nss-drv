@@ -1,20 +1,9 @@
 /*
- **************************************************************************
+ ***************************************************************************
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- **************************************************************************
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: ISC
+ ***************************************************************************
  */
 
 #include "nss_core.h"
@@ -91,9 +80,18 @@ struct nss_stats_info nss_ppe_vp_stats_str[NSS_PPE_VP_STATS_MAX] = {
  */
 void nss_ppe_vp_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_ppe_vp_sync_stats_msg *stats_msg, uint16_t if_num)
 {
-	uint16_t count = stats_msg->count;
+	uint16_t count;
 	uint16_t vp_index, i;
 
+	/*
+	 * Validate count is within bounds
+	 */
+	if (stats_msg->count > NSS_PPE_VP_MAX_NUM) {
+		nss_warning("%px: Invalid count %d exceeds maximum %d\n", nss_ctx, stats_msg->count, NSS_PPE_VP_MAX_NUM);
+		return;
+	}
+
+	count = stats_msg->count;
 	spin_lock_bh(&nss_ppe_vp_stats_lock);
 
 	/*
@@ -110,9 +108,14 @@ void nss_ppe_vp_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_ppe_vp_s
 		count--;
 
 		/*
-		 * Update stats in global array
+		 * Calculate and validate vp_index
 		 */
 		vp_index = stats_msg->vp_stats[count].ppe_port_num - NSS_PPE_VP_START;
+		if (vp_index >= NSS_PPE_VP_MAX_NUM) {
+			nss_warning("%px: Invalid vp_index %d from ppe_port_num %d\n", 
+				nss_ctx, vp_index, stats_msg->vp_stats[count].ppe_port_num);
+			continue;
+		}
 		nss_ppe_vp_debug_stats.vp_stats[vp_index].ppe_port_num = stats_msg->vp_stats[count].ppe_port_num;
 		nss_ppe_vp_debug_stats.vp_stats[vp_index].nss_if = stats_msg->vp_stats[count].nss_if;
 		nss_ppe_vp_debug_stats.vp_stats[vp_index].rx_packets += stats_msg->vp_stats[count].stats.rx_packets;

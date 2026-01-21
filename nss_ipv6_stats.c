@@ -1,20 +1,9 @@
 /*
- **************************************************************************
+ ***************************************************************************
  * Copyright (c) 2016-2017, 2019-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * Permission to use, copy, modify, and/or distribute this software for
- * any purpose with or without fee is hereby granted, provided that the
- * above copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
- * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- **************************************************************************
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: ISC
+ ***************************************************************************
  */
 
 #include "nss_core.h"
@@ -55,8 +44,10 @@ static ssize_t nss_ipv6_stats_read(struct file *fp, char __user *ubuf, size_t sz
 	}
 
 	/*
-	 * Note: The assumption here is that exception event count is larger than other statistics count for IPv6.
+	 * Allocate memory for stats_shadow using the maximum of NSS_IPV6_STATS_MAX and NSS_IPV6_EXCEPTION_EVENT_MAX
+	 * to ensure we have enough space for both sets of statistics.
 	 */
+	BUILD_BUG_ON(NSS_IPV6_STATS_MAX > NSS_IPV6_EXCEPTION_EVENT_MAX);
 	stats_shadow = kzalloc(NSS_IPV6_EXCEPTION_EVENT_MAX * 8, GFP_KERNEL);
 	if (unlikely(stats_shadow == NULL)) {
 		nss_warning("Could not allocate memory for local shadow buffer");
