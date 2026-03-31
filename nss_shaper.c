@@ -1,16 +1,8 @@
 /*
  **************************************************************************
  * Copyright (c) 2014, 2016-2020 The Linux Foundation. All rights reserved.
- * Permission to use, copy, modify, and/or distribute this software for
- * any purpose with or without fee is hereby granted, provided that the
- * above copyright notice and this permission notice appear in all copies.
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
- * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: ISC
  **************************************************************************
  */
 
@@ -80,7 +72,7 @@ void *nss_shaper_register_shaper_bounce_interface(uint32_t if_num, nss_shaper_bo
 	 */
 	reg = &nss_top->bounce_interface_registrants[if_num];
 	if (reg->registered) {
-		spin_unlock_bh(&nss_top->stats_lock);
+		spin_unlock_bh(&nss_top->lock);
 		module_put(owner);
 		nss_warning("Already registered: %u", if_num);
 		BUG_ON(false);
@@ -125,7 +117,7 @@ void nss_shaper_unregister_shaper_bounce_interface(uint32_t if_num)
 	 */
 	reg = &nss_top->bounce_interface_registrants[if_num];
 	if (!reg->registered) {
-		spin_unlock_bh(&nss_top->stats_lock);
+		spin_unlock_bh(&nss_top->lock);
 		nss_warning("Already unregistered: %u", if_num);
 		BUG_ON(false);
 	}
@@ -185,7 +177,7 @@ void *nss_shaper_register_shaper_bounce_bridge(uint32_t if_num, nss_shaper_bounc
 	 */
 	reg = &nss_top->bounce_bridge_registrants[if_num];
 	if (reg->registered) {
-		spin_unlock_bh(&nss_top->stats_lock);
+		spin_unlock_bh(&nss_top->lock);
 		module_put(owner);
 		nss_warning("Already registered: %u", if_num);
 		BUG_ON(false);
@@ -231,7 +223,7 @@ void nss_shaper_unregister_shaper_bounce_bridge(uint32_t if_num)
 	 */
 	reg = &nss_top->bounce_bridge_registrants[if_num];
 	if (!reg->registered) {
-		spin_unlock_bh(&nss_top->stats_lock);
+		spin_unlock_bh(&nss_top->lock);
 		nss_warning("Already unregistered: %u", if_num);
 		BUG_ON(false);
 	}
@@ -240,9 +232,9 @@ void nss_shaper_unregister_shaper_bounce_bridge(uint32_t if_num)
 	 * Wait until any bounce callback that is active is finished
 	 */
 	while (reg->callback_active) {
-		spin_unlock_bh(&nss_top->stats_lock);
+		spin_unlock_bh(&nss_top->lock);
 		yield();
-		spin_lock_bh(&nss_top->stats_lock);
+		spin_lock_bh(&nss_top->lock);
 	}
 
 	/*
@@ -283,7 +275,7 @@ nss_tx_status_t nss_shaper_bounce_interface_packet(void *ctx, uint32_t if_num, s
 	spin_lock_bh(&nss_top->lock);
 	reg = &nss_top->bounce_interface_registrants[if_num];
 	if (!reg->registered) {
-		spin_unlock_bh(&nss_top->stats_lock);
+		spin_unlock_bh(&nss_top->lock);
 		nss_warning("unregistered: %u", if_num);
 		return NSS_TX_FAILURE;
 	}
@@ -327,7 +319,7 @@ nss_tx_status_t nss_shaper_bounce_bridge_packet(void *ctx, uint32_t if_num, stru
 	spin_lock_bh(&nss_top->lock);
 	reg = &nss_top->bounce_bridge_registrants[if_num];
 	if (!reg->registered) {
-		spin_unlock_bh(&nss_top->stats_lock);
+		spin_unlock_bh(&nss_top->lock);
 		nss_warning("unregistered: %u", if_num);
 		return NSS_TX_FAILURE;
 	}
