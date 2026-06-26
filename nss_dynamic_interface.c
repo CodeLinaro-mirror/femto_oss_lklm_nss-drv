@@ -1,19 +1,8 @@
 /*
  **************************************************************************
  * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022,2024 Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * Permission to use, copy, modify, and/or distribute this software for
- * any purpose with or without fee is hereby granted, provided that the
- * above copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
- * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: ISC
  **************************************************************************
  */
 
@@ -84,11 +73,12 @@ static void nss_dynamic_interface_handler(struct nss_ctx_instance *nss_ctx, stru
 		if (ncm->response == NSS_CMN_RESPONSE_ACK) {
 			nss_info("%px alloc_node response ack if_num %d\n", nss_ctx, ndim->msg.alloc_node.if_num);
 			if_num = ndim->msg.alloc_node.if_num;
-			if (if_num > 0) {
-				nss_dynamic_interface_assigned_types[nss_ctx->id][if_num - NSS_DYNAMIC_IF_START] = ndim->msg.alloc_node.type;
-			} else {
-				nss_warning("%px: if_num < 0\n", nss_ctx);
+			if (!nss_is_dynamic_interface(if_num)) {
+				nss_warning("%px: alloc_node if_num %d out of range\n", nss_ctx, if_num);
+				return;
 			}
+
+			nss_dynamic_interface_assigned_types[nss_ctx->id][if_num - NSS_DYNAMIC_IF_START] = ndim->msg.alloc_node.type;
 		}
 
 		break;
@@ -97,6 +87,11 @@ static void nss_dynamic_interface_handler(struct nss_ctx_instance *nss_ctx, stru
 		if (ncm->response == NSS_CMN_RESPONSE_ACK) {
 			nss_info("%px dealloc_node response ack if_num %d\n", nss_ctx, ndim->msg.dealloc_node.if_num);
 			if_num = ndim->msg.dealloc_node.if_num;
+			if (!nss_is_dynamic_interface(if_num)) {
+				nss_warning("%px: dealloc_node if_num %d out of range\n", nss_ctx, if_num);
+				return;
+			}
+
 			nss_dynamic_interface_assigned_types[nss_ctx->id][if_num - NSS_DYNAMIC_IF_START] = NSS_DYNAMIC_INTERFACE_TYPE_NONE;
 			/*
 			 * Send dynamic interface dealloc notifications to the registered modules.
@@ -305,13 +300,13 @@ nss_tx_status_t nss_dynamic_interface_dealloc_node(int if_num, enum nss_dynamic_
 	 */
 	status = nss_dynamic_interface_tx_sync(nss_ctx, &di_data, &ndim);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%px not able to transmit alloc node msg\n", nss_ctx);
+		nss_warning("%px not able to transmit dealloc node msg\n", nss_ctx);
 		return status;
 	}
 
 	if (di_data.response != NSS_CMN_RESPONSE_ACK) {
 		nss_warning("%px Received NACK from NSS\n", nss_ctx);
-		return -1;
+		return NSS_TX_FAILURE;
 	}
 
 	return status;
