@@ -86,10 +86,10 @@ bool nss_wifi_mesh_stats_handle_alloc(nss_if_num_t if_num, int32_t ifindex)
 		return false;
 	}
 
-	spin_lock(&nss_wifi_mesh_stats_lock);
+	spin_lock_bh(&nss_wifi_mesh_stats_lock);
 	for (idx = 0; idx < NSS_WIFI_MESH_MAX_DYNAMIC_INTERFACE; idx++) {
 		if (nss_wifi_mesh_stats_hdl[idx] && nss_wifi_mesh_stats_hdl[idx]->if_num == if_num) {
-			spin_unlock(&nss_wifi_mesh_stats_lock);
+			spin_unlock_bh(&nss_wifi_mesh_stats_lock);
 			nss_warning("Already a handle present for this interface number: 0x%x\n", if_num);
 			kfree(h);
 			return false;
@@ -105,10 +105,10 @@ bool nss_wifi_mesh_stats_handle_alloc(nss_if_num_t if_num, int32_t ifindex)
 		h->mesh_idx = idx;
 		h->ifindex = ifindex;
 		nss_wifi_mesh_stats_hdl[idx] = h;
-		spin_unlock(&nss_wifi_mesh_stats_lock);
+		spin_unlock_bh(&nss_wifi_mesh_stats_lock);
 		return true;
 	}
-	spin_unlock(&nss_wifi_mesh_stats_lock);
+	spin_unlock_bh(&nss_wifi_mesh_stats_lock);
 	nss_warning("No free index available for handle with ifnum: 0x%x\n", if_num);
 	kfree(h);
 	return false;
@@ -122,16 +122,16 @@ bool nss_wifi_mesh_stats_handle_free(nss_if_num_t if_num)
 {
 	struct nss_wifi_mesh_stats_handle *h;
 
-	spin_lock(&nss_wifi_mesh_stats_lock);
+	spin_lock_bh(&nss_wifi_mesh_stats_lock);
 	h = nss_wifi_mesh_get_stats_handle(if_num);
 	if (!h) {
-		spin_unlock(&nss_wifi_mesh_stats_lock);
+		spin_unlock_bh(&nss_wifi_mesh_stats_lock);
 		nss_warning("Unable to free Wi-Fi mesh stats handle instance for interface number: 0x%x\n", if_num);
 		return false;
 	}
 
 	nss_wifi_mesh_stats_hdl[h->mesh_idx] = NULL;
-	spin_unlock(&nss_wifi_mesh_stats_lock);
+	spin_unlock_bh(&nss_wifi_mesh_stats_lock);
 	kfree(h);
 	return true;
 }
@@ -169,16 +169,16 @@ static bool nss_wifi_mesh_get_stats(nss_if_num_t if_num, struct nss_wifi_mesh_hd
 		return false;
 	}
 
-	spin_lock(&nss_wifi_mesh_stats_lock);
+	spin_lock_bh(&nss_wifi_mesh_stats_lock);
 	h = nss_wifi_mesh_get_stats_handle(if_num);
 	if (!h) {
-		spin_unlock(&nss_wifi_mesh_stats_lock);
+		spin_unlock_bh(&nss_wifi_mesh_stats_lock);
 		nss_warning("Invalid Wi-Fi mesh stats handle for interface number: %d\n", if_num);
 		return false;
 	}
 
 	memcpy(stats, &h->stats, sizeof(*stats));
-	spin_unlock(&nss_wifi_mesh_stats_lock);
+	spin_unlock_bh(&nss_wifi_mesh_stats_lock);
 	return true;
 }
 
@@ -314,15 +314,15 @@ static ssize_t nss_wifi_mesh_stats_read(struct file *fp, char __user *ubuf, size
 			continue;
 		}
 
-		spin_lock(&nss_wifi_mesh_stats_lock);
+		spin_lock_bh(&nss_wifi_mesh_stats_lock);
 		handle = nss_wifi_mesh_get_stats_handle(if_num);
 		if (!handle) {
-			spin_unlock(&nss_wifi_mesh_stats_lock);
+			spin_unlock_bh(&nss_wifi_mesh_stats_lock);
 			nss_warning("Invalid Wi-Fi mesh stats handle, if_num: %d\n", if_num);
 			continue;
 		}
 		ifindex = handle->ifindex;
-		spin_unlock(&nss_wifi_mesh_stats_lock);
+		spin_unlock_bh(&nss_wifi_mesh_stats_lock);
 
 		ndev = dev_get_by_index(&init_net, ifindex);
 		if (!ndev) {
@@ -515,10 +515,10 @@ void nss_wifi_mesh_update_stats(nss_if_num_t if_num, struct nss_wifi_mesh_stats_
 	uint32_t *src;
 	int i;
 
-	spin_lock(&nss_wifi_mesh_stats_lock);
+	spin_lock_bh(&nss_wifi_mesh_stats_lock);
 	handle = nss_wifi_mesh_get_stats_handle(if_num);
 	if (!handle) {
-		spin_unlock(&nss_wifi_mesh_stats_lock);
+		spin_unlock_bh(&nss_wifi_mesh_stats_lock);
 		nss_warning("Invalid Wi-Fi mesh stats handle, if_num: %d\n", if_num);
 		return;
 	}
@@ -576,7 +576,7 @@ void nss_wifi_mesh_update_stats(nss_if_num_t if_num, struct nss_wifi_mesh_stats_
 		for (i = NSS_WIFI_MESH_EXCEPTION_STATS_TYPE_PACKETS_SUCCESS; i < NSS_WIFI_MESH_EXCEPTION_STATS_TYPE_MAX; i++) {
 			*dst++ += *src++;
 		}
-		spin_unlock(&nss_wifi_mesh_stats_lock);
+		spin_unlock_bh(&nss_wifi_mesh_stats_lock);
 		break;
 
 	case NSS_DYNAMIC_INTERFACE_TYPE_WIFI_MESH_OUTER:
@@ -601,11 +601,11 @@ void nss_wifi_mesh_update_stats(nss_if_num_t if_num, struct nss_wifi_mesh_stats_
 		for (i = NSS_WIFI_MESH_DECAP_STATS_TYPE_PATH_REFRESH_SENT; i < NSS_WIFI_MESH_DECAP_STATS_TYPE_MAX; i++) {
 			*dst++ += *src++;
 		}
-		spin_unlock(&nss_wifi_mesh_stats_lock);
+		spin_unlock_bh(&nss_wifi_mesh_stats_lock);
 		break;
 
 	default:
-		spin_unlock(&nss_wifi_mesh_stats_lock);
+		spin_unlock_bh(&nss_wifi_mesh_stats_lock);
 		nss_warning("%px: Received invalid dynamic interface type: %d\n", handle, type);
 		nss_assert(0);
 	}
